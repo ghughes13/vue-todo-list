@@ -1,45 +1,77 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+    <ol>
+      <li v-for="(item, index) in todoItems" :key="item">
+        {{ item }} 
+        <div>
+          <input type="text" class="edit-text" :class="'edit-text-' + [[ index ]]" v-model="editText"/>
+          <button v-on:click="showEditApplyBtn(item, index)" class="edit-btn" :class="'edit-for-' + [[ index ]]">Edit</button>
+          <button v-on:click="editItem(item, index)" class="apply-edit-btn" :class="'apply-edit-for-' + [[ index ]]">Apply</button>
+          <button v-on:click="deleteItem(item)">X</button>
+        </div>
+      </li>
+    </ol>
+    <p class="edit-error" v-if="showError">Error: Edited Item Can Not Be Blank</p>
+    <input v-model="addItemInput" placeholder="Add Item"/>
+    <button type="submit" v-on:click="addItem()">Add</button>
   </div>
 </template>
 
 <script>
 export default {
   name: 'HelloWorld',
+  data () {
+    return {
+      todoItems: ['this', 'that', 'other'],
+      addItemInput: '',
+      editText: '',
+      showError: false
+    }
+  },
   props: {
     msg: String
+  },
+  methods: {
+    addItem () {
+      this.todoItems.push(this.addItemInput);
+      this.addItemInput = '';
+    },
+    showEditApplyBtn (item, index) {
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.style.display = "inline-block"
+      })
+      document.querySelectorAll('.apply-edit-btn').forEach(btn => {
+        btn.style.display = "none"
+      })
+      document.querySelectorAll('.edit-text').forEach(btn => {
+        btn.style.display = "none"
+      })
+      document.querySelector('.edit-for-' + index).style.display = "none";
+      document.querySelector('.apply-edit-for-' + index).style.display = "inline-block";
+      document.querySelector('.edit-text-' + index).style.display = "inline-block";
+    },
+    editItem (itemToEdit) {
+      let foundIndex = this.todoItems.findIndex(toDoItem => toDoItem == itemToEdit );
+      if(this.editText === '') {
+        this.showError = true
+      } else {
+        this.todoItems[foundIndex] = this.editText
+        this.editText = ''
+        this.showError = false
+      }
+      
+    },
+    deleteItem (itemToDelete) {
+      let foundIndex = this.todoItems.findIndex(toDoItem => toDoItem == itemToDelete );
+      if (foundIndex > -1) {
+        this.todoItems.splice(foundIndex, 1);
+      }
+    }
   }
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 h3 {
   margin: 40px 0 0;
@@ -49,10 +81,18 @@ ul {
   padding: 0;
 }
 li {
-  display: inline-block;
-  margin: 0 10px;
+  text-align: left;
+  margin: auto;
+  max-width: 400px;
+  display: flex;
+  justify-content: space-between;
 }
 a {
   color: #42b983;
+}
+
+.edit-text,
+.apply-edit-btn {
+  display: none;
 }
 </style>
